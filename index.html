@@ -42,13 +42,13 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
 .cb.on .bl{color:#4dabff}
 #kbd{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);display:flex;gap:14px;z-index:90;opacity:.25;font-size:.53rem;color:rgba(255,255,255,.5)}
 .kbd{display:inline-block;padding:1px 5px;border:1px solid rgba(255,255,255,.2);border-radius:3px;font-family:'DM Mono',monospace;margin-right:2px}
-#debug{position:fixed;top:50px;right:16px;background:rgba(0,0,0,.75);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.6rem;letter-spacing:.04em;z-index:100;min-width:220px;line-height:1.8;display:none}
+#debug{position:fixed;top:50px;right:16px;background:rgba(0,0,0,.75);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.58rem;letter-spacing:.04em;z-index:100;min-width:260px;line-height:1.9;display:none}
 #debug.show{display:block}
+#debugToggle{position:fixed;bottom:22px;right:16px;z-index:100;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;font-size:.65rem;font-family:'DM Mono',monospace;display:none}
 #error{position:fixed;inset:0;background:#0a0a12;display:none;align-items:center;justify-content:center;z-index:2000;flex-direction:column;gap:16px;text-align:center;padding:24px}
 #error.show{display:flex}
 #error h2{font-family:'Syne',sans-serif;font-size:1.4rem;color:#ff6b9d}
 #error p{color:rgba(255,255,255,.5);font-size:.78rem;max-width:420px;line-height:1.7}
-#debugToggle{position:fixed;bottom:22px;right:16px;z-index:100;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;font-size:.65rem;font-family:'DM Mono',monospace;display:none}
 </style>
 </head>
 <body>
@@ -92,11 +92,14 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
     <input type="file" id="bgIn" accept="image/*" style="display:none">
   </div>
   <div id="debug">
-    <div>camReady: <span id="d1">-</span></div>
-    <div>camPlaying: <span id="d2">-</span></div>
-    <div>videoSize: <span id="d3">-</span></div>
-    <div>handLandmarks: <span id="d4">-</span></div>
-    <div>streamTracks: <span id="d5">-</span></div>
+    <div>fps: <span id="d0">-</span></div>
+    <div>video: <span id="d1">-</span></div>
+    <div>playing: <span id="d2">-</span></div>
+    <div>size: <span id="d3">-</span></div>
+    <div>hand: <span id="d4">-</span></div>
+    <div>model: <span id="d5">-</span></div>
+    <div>sendQ: <span id="d6">-</span></div>
+    <div>tracks: <span id="d7">-</span></div>
   </div>
 </div>
 <button id="debugToggle">D</button>
@@ -106,13 +109,12 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
 
 <script>
 "use strict";
-const L = (...a) => console.log('[Glass]', ...a);
+const L = (...a) => console.log('[G]', ...a);
 
 // Progress
 function setProg(pct, txt, step) {
   document.getElementById('pf').style.width = pct + '%';
   document.getElementById('ps').textContent = txt || '';
-  L(pct + '%', txt);
   if (step !== undefined) for (let i = 1; i <= 4; i++) {
     const el = document.getElementById('s' + i);
     el.classList.toggle('done', i < step);
@@ -174,22 +176,29 @@ float edge(vec2 uv,float r){
 }
 
 void main(){
-  vec2 uv=v_uv;
-  vec2 muv=vec2(1.0-uv.x,uv.y);
-  float m=texture2D(u_mask,muv).r;
-  m=smoothstep(0.02,0.45,m);
-  float t=u_time;
+  vec2 uv = v_uv;
 
-  // ---- Camera sample: always from muv (mirrored) ----
-  vec4 camCol = texture2D(u_cam, muv);
+  // uv.y=1 is screen top, uv.y=0 is screen bottom
+  // Camera texture is flipped Y (UNPACK_FLIP_Y), so texture y=1 = video top = screen top
+  // Mirror for selfie: flip X
+  vec2 cuv = vec2(1.0 - uv.x, uv.y);
+  vec4 camCol = texture2D(u_cam, cuv);
 
-  // Debug mode: show raw camera
+  // Mask texture: also flipped Y by UNPACK_FLIP_Y
+  // Landmarks y=0 = video top = texture y=1 = screen top (uv.y=1)
+  // So mask sample uv = vec2(1-x, y) same as camera
+  vec2 muv = vec2(1.0 - uv.x, uv.y);
+  float m = texture2D(u_mask, muv).r;
+  m = smoothstep(0.02, 0.45, m);
+  float t = u_time;
+
+  // Debug: show raw camera
   if(u_debug > 0.5){
     gl_FragColor = camCol;
     return;
   }
 
-  vec2 baseUV = u_hasBg > 0.5 ? uv : muv;
+  vec2 baseUV = u_hasBg > 0.5 ? uv : cuv;
   vec4 bg = u_hasBg > 0.5 ? texture2D(u_bg, uv) : camCol;
 
   /* ======== MODE 0: LIQUID GLASS ======== */
@@ -272,8 +281,9 @@ function initGL() {
     gl.shaderSource(s, src);
     gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      LOG('SHADER ERROR:', gl.getShaderInfoLog(s));
-      showErr('Shader 编译失败: ' + gl.getShaderInfoLog(s));
+      const info = gl.getShaderInfoLog(s);
+      L('SHADER ERR:', info);
+      showErr('Shader: ' + info);
       return null;
     }
     return s;
@@ -287,11 +297,10 @@ function initGL() {
   gl.attachShader(prog, fs);
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-    showErr('Link fail: ' + gl.getProgramInfoLog(prog));
+    showErr('Link: ' + gl.getProgramInfoLog(prog));
     return false;
   }
   gl.useProgram(prog);
-  L('WebGL init OK');
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -322,6 +331,7 @@ function initGL() {
   gl.uniform1i(uLoc.u_mask, 1);
   gl.uniform1i(uLoc.u_bg, 2);
   gl.uniform1f(uLoc.u_debug, 0.0);
+  L('WebGL OK');
   return true;
 }
 
@@ -378,9 +388,9 @@ function smoothLandmarks(raw) {
 
 // ============ MEDIAPIPE ============
 let handsMP = null, modelReady = false, curLandmarks = null;
+let handBusy = false, sendCount = 0;
 
 function createHands() {
-  L('Creating Hands...');
   handsMP = new Hands({
     locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`,
   });
@@ -401,72 +411,59 @@ function createHands() {
   });
 }
 
-// ============ CAMERA (key fix) ============
-let camStream = null;
+// ============ HAND DETECTION LOOP (key fix!) ============
+async function handLoop() {
+  if (!handsMP) { setTimeout(handLoop, 200); return; }
+  if (!S.playing) return;
 
-async function startCam() {
   const video = document.getElementById('cam');
 
-  // Ensure attributes for autoplay policy compliance
+  if (video.readyState >= 2 && !handBusy) {
+    handBusy = true;
+    try {
+      await handsMP.send({ image: video });
+      sendCount++;
+    } catch (e) {
+      if (sendCount === 0) L('Send error:', e.message);
+    }
+    handBusy = false;
+  }
+
+  // Run at ~30fps (33ms interval)
+  setTimeout(handLoop, 33);
+}
+
+// ============ CAMERA ============
+async function startCam() {
+  const video = document.getElementById('cam');
   video.muted = true;
   video.autoplay = true;
   video.playsInline = true;
-  video.setAttribute('playsinline', '');
-  video.setAttribute('muted', '');
-  video.setAttribute('autoplay', '');
 
-  L('Requesting camera...');
-  camStream = await navigator.mediaDevices.getUserMedia({
-    video: {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      facingMode: 'user'
-    },
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
     audio: false,
   });
 
-  L('Got stream, tracks:', camStream.getTracks().length);
-  camStream.getTracks().forEach(t => L('Track:', t.kind, t.label, t.readyState));
-
-  video.srcObject = camStream;
-
-  // Explicit play() - this is critical
+  video.srcObject = stream;
   await video.play();
-  L('Video play() resolved');
 
-  // Wait for actual dimensions
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      L('Video dimension timeout');
-      reject(new Error('视频流未就绪，请检查摄像头'));
-    }, 8000);
-
+    const timeout = setTimeout(() => reject(new Error('摄像头启动超时')), 10000);
     const check = () => {
-      if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
+      if (video.videoWidth > 0 && video.readyState >= 2) {
         clearTimeout(timeout);
-        L('Video ready:', video.videoWidth, 'x', video.videoHeight, 'readyState:', video.readyState);
+        L('Video:', video.videoWidth, 'x', video.videoHeight);
         resolve();
       } else {
-        L('Waiting... readyState:', video.readyState, 'size:', video.videoWidth, 'x', video.videoHeight);
         setTimeout(check, 200);
       }
     };
-
-    video.onloadeddata = () => {
-      L('onloadeddata fired');
-      check();
-    };
-
-    // Also check immediately
+    video.onloadeddata = () => check();
     check();
   });
 
-  // Verify stream is still active
-  if (camStream.active) {
-    L('Stream is active');
-  } else {
-    L('WARNING: Stream became inactive!');
-  }
+  return stream;
 }
 
 function configureCanvas() {
@@ -478,32 +475,21 @@ function configureCanvas() {
   maskCvs.height = Math.round(video.videoHeight * 0.5);
   blurCvs.width = Math.round(video.videoWidth * 0.5);
   blurCvs.height = Math.round(video.videoHeight * 0.5);
-  L('Canvas:', out.width, 'x', out.height);
 }
 
 function waitForModel(timeout) {
-  timeout = timeout || 15000;
   return new Promise(resolve => {
     const start = Date.now();
     const check = () => {
-      if (modelReady || Date.now() - start > timeout) {
-        L('Model ready:', modelReady, '(' + (Date.now() - start) + 'ms)');
-        resolve();
-      } else {
-        setTimeout(check, 200);
-      }
+      if (modelReady || Date.now() - start > timeout) resolve();
+      else setTimeout(check, 200);
     };
     check();
   });
 }
 
 // ============ RENDER ============
-const MODES = [
-  { name: '液态玻璃' },
-  { name: '霓虹描边' },
-  { name: '能量护盾' },
-];
-
+const MODES = [{ name: '液态玻璃' }, { name: '霓虹描边' }, { name: '能量护盾' }];
 let S = { mode: 0, recording: false, hasBg: false, playing: false, time: 0, lastTs: 0, frames: 0, fps: 0, debug: false };
 
 function render(ts) {
@@ -525,37 +511,33 @@ function render(ts) {
 
   // Debug panel
   if (S.debug) {
-    document.getElementById('d1').textContent = video.readyState >= 2 ? 'YES' : 'NO (rs=' + video.readyState + ')';
-    document.getElementById('d2').textContent = !video.paused ? 'YES' : 'NO';
+    document.getElementById('d0').textContent = S.fps;
+    document.getElementById('d1').textContent = video.readyState >= 2 ? 'OK' : 'rs=' + video.readyState;
+    document.getElementById('d2').textContent = video.paused ? 'PAUSED' : 'PLAYING';
     document.getElementById('d3').textContent = video.videoWidth + 'x' + video.videoHeight;
-    document.getElementById('d4').textContent = curLandmarks ? '21 pts' : 'null';
-    document.getElementById('d5').textContent = camStream ? camStream.getTracks().length + ' tracks' : 'none';
+    document.getElementById('d4').textContent = curLandmarks ? curLandmarks.length + ' pts' : 'null';
+    document.getElementById('d5').textContent = modelReady ? 'LOADED' : 'loading...';
+    document.getElementById('d6').textContent = sendCount;
+    document.getElementById('d7').textContent = video.srcObject ? video.srcObject.getTracks().length : 0;
   }
 
-  // Upload camera texture
+  // Upload camera texture with Y flip
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texCam);
-
-  // KEY: check video is actually producing frames
   if (video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
-    try {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-    } catch (e) {
-      L('texImage2D error:', e.message);
-    }
-  } else {
-    // Upload a debug pattern so screen isn't completely black
-    if (S.frames % 60 === 0) {
-      L('Video not ready, readyState:', video.readyState, 'paused:', video.paused);
-    }
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   }
 
-  // Upload mask
+  // Upload mask texture
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, texMask);
   if (curLandmarks) {
     drawMask(curLandmarks);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, blurCvs);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   } else {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
       new Uint8Array([0,0,0,255]));
@@ -563,12 +545,12 @@ function render(ts) {
 
   // Uniforms
   gl.uniform1f(uLoc.u_time, S.time);
-  gl.uniform2f(uLoc.u_res, document.getElementById('output').width, document.getElementById('output').height);
+  gl.uniform2f(uLoc.u_res, out.width, out.height);
   gl.uniform1f(uLoc.u_mode, S.mode);
   gl.uniform1f(uLoc.u_hasBg, S.hasBg ? 1.0 : 0.0);
   gl.uniform1f(uLoc.u_debug, S.debug ? 1.0 : 0.0);
 
-  gl.viewport(0, 0, document.getElementById('output').width, document.getElementById('output').height);
+  gl.viewport(0, 0, out.width, out.height);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
@@ -580,7 +562,6 @@ function switchMode() {
   el.style.borderColor = 'rgba(196,77,255,0.5)';
   setTimeout(() => { el.style.borderColor = 'rgba(255,255,255,0.08)'; }, 300);
 }
-
 function screenshot() {
   const f = document.createElement('div');
   f.className = 'flash';
@@ -588,20 +569,17 @@ function screenshot() {
   setTimeout(() => f.remove(), 400);
   setTimeout(() => {
     document.getElementById('output').toBlob(blob => {
-      if (!blob) { showToast('截图失败'); return; }
-      const url = URL.createObjectURL(blob);
+      if (!blob) return;
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = 'glass_' + Date.now() + '.png';
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
       showToast('截图已保存');
     }, 'image/png');
   }, 50);
 }
-
 let recorder = null, chunks = [];
 function toggleRec() {
   if (S.recording) {
@@ -619,15 +597,12 @@ function toggleRec() {
     chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: mime });
-      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(new Blob(chunks, { type: mime }));
       a.download = 'glass_' + Date.now() + '.webm';
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
     };
     recorder.start();
     S.recording = true;
@@ -637,9 +612,7 @@ function toggleRec() {
     showToast('开始录屏');
   }
 }
-
 function uploadBg() { document.getElementById('bgIn').click(); }
-
 document.getElementById('bgIn').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -662,7 +635,6 @@ document.getElementById('bMode').addEventListener('click', switchMode);
 document.getElementById('bShot').addEventListener('click', screenshot);
 document.getElementById('bRec').addEventListener('click', toggleRec);
 document.getElementById('bBg').addEventListener('click', uploadBg);
-
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (e.code === 'Space') { e.preventDefault(); switchMode(); }
@@ -670,8 +642,6 @@ document.addEventListener('keydown', e => {
   else if (e.code === 'KeyR') toggleRec();
   else if (e.code === 'KeyB') uploadBg();
 });
-
-// Debug toggle
 const dbgEl = document.getElementById('debug');
 document.getElementById('debugToggle').addEventListener('click', () => {
   S.debug = !S.debug;
@@ -681,99 +651,44 @@ document.getElementById('debugToggle').addEventListener('click', () => {
 // ============ INIT ============
 async function init() {
   try {
-    // 1. WebGL
     setProg(5, '初始化 WebGL...', 1);
     await wait(100);
     if (!initGL()) return;
-    setProg(18, 'WebGL 就绪', 1);
+    setProg(20, 'WebGL 就绪', 1);
 
-    // 2. Camera first (we need cam stream early for debug)
-    setProg(25, '请求摄像头权限...', 3);
+    setProg(28, '启动摄像头...', 4);
     await wait(50);
     await startCam();
-    setProg(60, '摄像头就绪', 3);
+    setProg(55, '摄像头就绪', 4);
 
-    // 3. Load MediaPipe
-    setProg(65, '加载 MediaPipe Hands...', 2);
-    await wait(50);
-    try {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
-        s.crossOrigin = 'anonymous';
-        s.onload = res;
-        s.onerror = () => rej(new Error('camera_utils 加载失败'));
-        document.head.appendChild(s);
-      });
-      L('camera_utils loaded');
-      setProg(72, 'camera_utils 就绪', 2);
-    } catch (e) {
-      L('Trying backup CDN...');
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://unpkg.com/@mediapipe/camera_utils/camera_utils.js';
-        s.crossOrigin = 'anonymous';
-        s.onload = res;
-        s.onerror = () => rej(new Error('camera_utils 加载失败 (所有 CDN)'));
-        document.head.appendChild(s);
-      });
-      setProg(72, 'camera_utils 就绪', 2);
-    }
-
-    try {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
-        s.crossOrigin = 'anonymous';
-        s.onload = res;
-        s.onerror = () => rej(new Error('hands.js 加载失败'));
-        document.head.appendChild(s);
-      });
-      L('hands.js loaded');
-    } catch (e) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://unpkg.com/@mediapipe/hands/hands.js';
-        s.crossOrigin = 'anonymous';
-        s.onload = res;
-        s.onerror = () => rej(new Error('hands.js 加载失败 (所有 CDN)'));
-        document.head.appendChild(s);
-      });
-    }
-    setProg(80, 'hands 引擎就绪', 2);
-
-    // 4. Create Hands
-    setProg(82, '初始化手部检测...', 3);
+    setProg(60, '初始化手部检测...', 3);
     await wait(50);
     createHands();
-    setProg(88, '配置画布', 3);
-
-    // 5. Configure
+    setProg(70, '画布配置...', 3);
     configureCanvas();
 
-    // 6. Show debug button
-    document.getElementById('debugToggle').style.display = 'block';
+    setProg(78, '等待模型加载...', 3);
+    await waitForModel(12000);
+    setProg(95, '启动检测循环...', 3);
 
-    // 7. Wait for model (don't block, just wait a bit)
-    setProg(90, '加载手部模型 (首次较慢)...', 3);
-    await waitForModel(8000);
+    // Start hand detection loop
+    handLoop();
 
     setProg(100, '就绪!', 4);
     await wait(400);
 
-    // 8. GO
     document.getElementById('loader').classList.add('hidden');
     document.getElementById('app').style.display = 'block';
+    document.getElementById('debugToggle').style.display = 'block';
     S.playing = true;
     requestAnimationFrame(render);
     L('=== APP STARTED ===');
 
   } catch (err) {
-    L('INIT ERROR:', err);
-    showErr(err.message || '未知错误');
+    L('INIT ERR:', err);
+    showErr(err.message);
   }
 }
-
 init();
 </script>
 </body>
