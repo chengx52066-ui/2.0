@@ -11,12 +11,12 @@
 body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidden;width:100vw;height:100vh}
 #loader{position:fixed;inset:0;background:#0a0a12;display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .8s ease,visibility .8s}
 #loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.lc{text-align:center;width:min(360px,85vw)}
+.lc{text-align:center;width:min(380px,88vw)}
 .lt{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:.15em;background:linear-gradient(135deg,#ff6b9d,#c44dff,#4dabff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
 .ls{font-size:.65rem;letter-spacing:.5em;color:rgba(255,255,255,.3);margin-bottom:2.8rem}
 .pb{width:100%;height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:1.2rem}
 .pf{height:100%;width:0%;background:linear-gradient(90deg,#ff6b9d,#c44dff,#4dabff);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
-.ps{font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:.08em;min-height:1.4em}
+.ps{font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:.08em;min-height:1.4em;word-break:break-all}
 .pst{margin-top:2.2rem;display:flex;gap:1.5rem;justify-content:center}
 .psi{font-size:.58rem;letter-spacing:.08em;color:rgba(255,255,255,.15);transition:color .3s}
 .psi.active{color:rgba(255,255,255,.7)}
@@ -27,7 +27,7 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
 #mode-hud{top:16px;left:16px;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.08);font-family:'Syne',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.1em}
 #rec-dot{top:16px;left:50%;transform:translateX(-50%);background:rgba(180,20,20,.6);border:1px solid rgba(255,60,60,.4);display:none;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);color:#fff;padding:8px 22px;border-radius:8px;font-size:.75rem;letter-spacing:.06em;backdrop-filter:blur(10px);z-index:200;animation:ta 2.2s ease forwards;pointer-events:none;border:1px solid rgba(255,255,255,.08)}
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);color:#fff;padding:8px 22px;border-radius:8px;font-size:.75rem;letter-spacing:.06em;backdrop-filter:blur(10px);z-index:200;animation:ta 2.2s ease forwards;pointer-events:none;border:1px solid rgba(255,255,255,.08);max-width:80vw;text-align:center}
 @keyframes ta{0%{opacity:0;transform:translateX(-50%) translateY(-6px)}8%{opacity:1;transform:translateX(-50%) translateY(0)}82%{opacity:1}100%{opacity:0}}
 .flash{position:fixed;inset:0;background:#fff;z-index:300;animation:fl .35s ease forwards;pointer-events:none}
 @keyframes fl{0%{opacity:.7}100%{opacity:0}}
@@ -42,13 +42,16 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
 .cb.on .bl{color:#4dabff}
 #kbd{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);display:flex;gap:14px;z-index:90;opacity:.25;font-size:.53rem;color:rgba(255,255,255,.5)}
 .kbd{display:inline-block;padding:1px 5px;border:1px solid rgba(255,255,255,.2);border-radius:3px;font-family:'DM Mono',monospace;margin-right:2px}
-#debug{position:fixed;top:50px;right:16px;background:rgba(0,0,0,.75);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.58rem;letter-spacing:.04em;z-index:100;min-width:260px;line-height:1.9;display:none}
+#debug{position:fixed;top:50px;right:16px;background:rgba(0,0,0,.82);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.55rem;letter-spacing:.03em;z-index:100;min-width:280px;line-height:1.85;display:none}
 #debug.show{display:block}
+#debug .err{color:#ff6b6b}
+#debug .ok{color:#6bffa1}
 #debugToggle{position:fixed;bottom:22px;right:16px;z-index:100;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;font-size:.65rem;font-family:'DM Mono',monospace;display:none}
 #error{position:fixed;inset:0;background:#0a0a12;display:none;align-items:center;justify-content:center;z-index:2000;flex-direction:column;gap:16px;text-align:center;padding:24px}
 #error.show{display:flex}
 #error h2{font-family:'Syne',sans-serif;font-size:1.4rem;color:#ff6b9d}
-#error p{color:rgba(255,255,255,.5);font-size:.78rem;max-width:420px;line-height:1.7}
+#error p{color:rgba(255,255,255,.5);font-size:.78rem;max-width:440px;line-height:1.7}
+#error .fix{margin-top:12px;text-align:left;background:rgba(255,255,255,.05);border-radius:8px;padding:16px;font-size:.7rem;line-height:1.8;border:1px solid rgba(255,255,255,.08)}
 </style>
 </head>
 <body>
@@ -61,14 +64,14 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
     <div class="ps" id="ps">初始化中...</div>
     <div class="pst">
       <span class="psi" id="s1">WebGL</span>
-      <span class="psi" id="s2">脚本</span>
-      <span class="psi" id="s3">模型</span>
-      <span class="psi" id="s4">摄像头</span>
+      <span class="psi" id="s2">模型</span>
+      <span class="psi" id="s3">摄像头</span>
+      <span class="psi" id="s4">就绪</span>
     </div>
   </div>
 </div>
 
-<div id="error"><h2>初始化失败</h2><p id="emsg"></p></div>
+<div id="error"><h2>初始化失败</h2><p id="emsg"></p><div class="fix" id="efix" style="display:none"></div></div>
 
 <div id="app" style="display:none">
   <video id="cam" playsinline muted autoplay style="display:none"></video>
@@ -98,20 +101,18 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
     <div>size: <span id="d3">-</span></div>
     <div>hand: <span id="d4">-</span></div>
     <div>model: <span id="d5">-</span></div>
-    <div>sendQ: <span id="d6">-</span></div>
-    <div>tracks: <span id="d7">-</span></div>
+    <div>sends: <span id="d6">-</span></div>
+    <div>sendErr: <span id="d8">-</span></div>
+    <div>files: <span id="d9">-</span></div>
+    <div>cdn: <span id="d10">-</span></div>
   </div>
 </div>
 <button id="debugToggle">D</button>
-
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
 <script>
 "use strict";
 const L = (...a) => console.log('[G]', ...a);
 
-// Progress
 function setProg(pct, txt, step) {
   document.getElementById('pf').style.width = pct + '%';
   document.getElementById('ps').textContent = txt || '';
@@ -121,8 +122,9 @@ function setProg(pct, txt, step) {
     el.classList.toggle('active', i === step);
   }
 }
-function showErr(msg) {
+function showErr(msg, fix) {
   document.getElementById('emsg').textContent = msg;
+  if (fix) { document.getElementById('efix').innerHTML = fix; document.getElementById('efix').style.display = 'block'; }
   document.getElementById('error').classList.add('show');
   document.getElementById('loader').classList.add('hidden');
 }
@@ -174,96 +176,64 @@ float edge(vec2 uv,float r){
   float t2=texture2D(u_mask,uv-py).r,b=texture2D(u_mask,uv+py).r;
   return length(vec2(ri-l,b-t2));
 }
-
 void main(){
-  vec2 uv = v_uv;
-
-  // uv.y=1 is screen top, uv.y=0 is screen bottom
-  // Camera texture is flipped Y (UNPACK_FLIP_Y), so texture y=1 = video top = screen top
-  // Mirror for selfie: flip X
-  vec2 cuv = vec2(1.0 - uv.x, uv.y);
-  vec4 camCol = texture2D(u_cam, cuv);
-
-  // Mask texture: also flipped Y by UNPACK_FLIP_Y
-  // Landmarks y=0 = video top = texture y=1 = screen top (uv.y=1)
-  // So mask sample uv = vec2(1-x, y) same as camera
-  vec2 muv = vec2(1.0 - uv.x, uv.y);
-  float m = texture2D(u_mask, muv).r;
-  m = smoothstep(0.02, 0.45, m);
-  float t = u_time;
-
-  // Debug: show raw camera
-  if(u_debug > 0.5){
-    gl_FragColor = camCol;
-    return;
-  }
-
-  vec2 baseUV = u_hasBg > 0.5 ? uv : cuv;
-  vec4 bg = u_hasBg > 0.5 ? texture2D(u_bg, uv) : camCol;
-
-  /* ======== MODE 0: LIQUID GLASS ======== */
-  if(u_mode < 0.5){
-    vec2 np = uv * 4.0;
-    float n1 = fbm(np + t * 0.22);
-    float nc = n1;
-    float nr = fbm(np + vec2(0.008, 0.0) + t * 0.22);
-    float nt = fbm(np + vec2(0.0, 0.008) + t * 0.22);
-    vec2 grad = vec2(nr - nc, nt - nc);
-    vec2 ruv = baseUV + grad * m * 0.018;
-    float ca = m * 0.004 + edge(muv, 2.0) * 0.008;
+  vec2 uv=v_uv;
+  vec2 cuv=vec2(1.0-uv.x,uv.y);
+  vec4 camCol=texture2D(u_cam,cuv);
+  vec2 muv=vec2(1.0-uv.x,uv.y);
+  float m=texture2D(u_mask,muv).r;
+  m=smoothstep(0.02,0.45,m);
+  float t=u_time;
+  if(u_debug>0.5){gl_FragColor=camCol;return;}
+  vec2 baseUV=u_hasBg>0.5?uv:cuv;
+  vec4 bg=u_hasBg>0.5?texture2D(u_bg,uv):camCol;
+  if(u_mode<0.5){
+    vec2 np=uv*4.0;float n1=fbm(np+t*0.22);float nc=n1;
+    float nr=fbm(np+vec2(0.008,0.0)+t*0.22);
+    float nt=fbm(np+vec2(0.0,0.008)+t*0.22);
+    vec2 grad=vec2(nr-nc,nt-nc);
+    vec2 ruv=baseUV+grad*m*0.018;
+    float ca=m*0.004+edge(muv,2.0)*0.008;
     vec3 col;
-    if(u_hasBg > 0.5){
-      col.r = texture2D(u_bg, ruv + vec2(ca, 0.0)).r;
-      col.g = texture2D(u_bg, ruv).g;
-      col.b = texture2D(u_bg, ruv - vec2(ca, 0.0)).b;
-    } else {
-      col.r = texture2D(u_cam, ruv + vec2(ca, 0.0)).r;
-      col.g = texture2D(u_cam, ruv).g;
-      col.b = texture2D(u_cam, ruv - vec2(ca, 0.0)).b;
+    if(u_hasBg>0.5){
+      col.r=texture2D(u_bg,ruv+vec2(ca,0.0)).r;
+      col.g=texture2D(u_bg,ruv).g;
+      col.b=texture2D(u_bg,ruv-vec2(ca,0.0)).b;
+    }else{
+      col.r=texture2D(u_cam,ruv+vec2(ca,0.0)).r;
+      col.g=texture2D(u_cam,ruv).g;
+      col.b=texture2D(u_cam,ruv-vec2(ca,0.0)).b;
     }
-    float e = edge(muv, 1.5);
-    float pulse = 0.7 + 0.3 * sin(t * 2.5 + n1 * 5.0);
-    col += e * vec3(0.92, 0.96, 1.0) * pulse * 2.8;
-    float spec = pow(max(0.0, 1.0 - abs(n1 - 0.5) * 4.0), 5.0);
-    col += spec * m * 0.14;
-    col *= mix(vec3(1.0), vec3(1.03, 0.98, 0.96), m * 0.35);
-    gl_FragColor = mix(bg, vec4(col, 1.0), m);
-
-  /* ======== MODE 1: NEON ======== */
-  } else if(u_mode < 1.5){
-    float e = edge(muv, 2.0);
-    e = smoothstep(0.0, 0.6, e);
-    float g = edge(muv, 5.0);
-    g = smoothstep(0.0, 0.4, g);
-    float n = fbm(uv * 5.0 + t * 0.3);
-    float hue = t * 0.4 + n * 0.3;
-    vec3 neon = 0.5 + 0.5 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
-    float pulse = 0.6 + 0.4 * sin(t * 3.0 + n * 4.0);
-    vec3 res = bg.rgb;
-    res += g * neon * pulse * 1.2;
-    res += e * neon * pulse * 3.5;
-    res += m * neon * pulse * 0.06;
-    gl_FragColor = vec4(res, 1.0);
-
-  /* ======== MODE 2: ENERGY ======== */
-  } else {
-    float e = edge(muv, 1.5);
-    float g = edge(muv, 4.0);
-    float field = fbm(uv * 6.0 + t * 0.4);
-    float ep = 0.5 + 0.5 * sin(t * 4.0 + field * 6.283);
-    vec3 ec = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.92, 0.3), ep);
-    vec3 res = bg.rgb;
-    res += smoothstep(0.0, 0.5, g) * ec * ep * 1.6;
-    res += smoothstep(0.0, 0.6, e) * ec * 3.2;
-    float inner = fbm(uv * 8.0 + t * 0.6);
-    res += m * inner * 0.14 * ec * (0.5 + 0.5 * sin(t * 5.0));
-    for(int i = 0; i < 4; i++){
-      float fi = float(i);
-      vec2 puv = uv * (10.0 + fi * 3.0) + vec2(t * (0.2 + fi * 0.1));
-      float p = step(0.93, noise(puv));
-      res += p * m * ec * 0.55;
-    }
-    gl_FragColor = vec4(res, 1.0);
+    float e=edge(muv,1.5);
+    float pulse=0.7+0.3*sin(t*2.5+n1*5.0);
+    col+=e*vec3(0.92,0.96,1.0)*pulse*2.8;
+    float spec=pow(max(0.0,1.0-abs(n1-0.5)*4.0),5.0);
+    col+=spec*m*0.14;
+    col*=mix(vec3(1.0),vec3(1.03,0.98,0.96),m*0.35);
+    gl_FragColor=mix(bg,vec4(col,1.0),m);
+  }else if(u_mode<1.5){
+    float e=edge(muv,2.0);e=smoothstep(0.0,0.6,e);
+    float g=edge(muv,5.0);g=smoothstep(0.0,0.4,g);
+    float n=fbm(uv*5.0+t*0.3);float hue=t*0.4+n*0.3;
+    vec3 neon=0.5+0.5*cos(6.28318*(hue+vec3(0.0,0.33,0.67)));
+    float pulse=0.6+0.4*sin(t*3.0+n*4.0);
+    vec3 res=bg.rgb;
+    res+=g*neon*pulse*1.2;res+=e*neon*pulse*3.5;res+=m*neon*pulse*0.06;
+    gl_FragColor=vec4(res,1.0);
+  }else{
+    float e=edge(muv,1.5);float g=edge(muv,4.0);
+    float field=fbm(uv*6.0+t*0.4);
+    float ep=0.5+0.5*sin(t*4.0+field*6.283);
+    vec3 ec=mix(vec3(1.0,0.45,0.08),vec3(1.0,0.92,0.3),ep);
+    vec3 res=bg.rgb;
+    res+=smoothstep(0.0,0.5,g)*ec*ep*1.6;
+    res+=smoothstep(0.0,0.6,e)*ec*3.2;
+    float inner=fbm(uv*8.0+t*0.6);
+    res+=m*inner*0.14*ec*(0.5+0.5*sin(t*5.0));
+    for(int i=0;i<4;i++){float fi=float(i);
+      vec2 puv=uv*(10.0+fi*3.0)+vec2(t*(0.2+fi*0.1));
+      float p=step(0.93,noise(puv));res+=p*m*ec*0.55;}
+    gl_FragColor=vec4(res,1.0);
   }
 }`;
 
@@ -275,44 +245,33 @@ function initGL() {
   const c = document.getElementById('output');
   gl = c.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
   if (!gl) { showErr('浏览器不支持 WebGL'); return false; }
-
   function mk(type, src) {
     const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
+    gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      const info = gl.getShaderInfoLog(s);
-      L('SHADER ERR:', info);
-      showErr('Shader: ' + info);
-      return null;
+      showErr('Shader: ' + gl.getShaderInfoLog(s)); return null;
     }
     return s;
   }
   const vs = mk(gl.VERTEX_SHADER, VERT);
   const fs = mk(gl.FRAGMENT_SHADER, FRAG);
   if (!vs || !fs) return false;
-
   prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs);
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-    showErr('Link: ' + gl.getProgramInfoLog(prog));
-    return false;
+    showErr('Link: ' + gl.getProgramInfoLog(prog)); return false;
   }
   gl.useProgram(prog);
-
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
   const aP = gl.getAttribLocation(prog, 'a_pos');
   gl.enableVertexAttribArray(aP);
   gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
-
   ['u_cam','u_mask','u_bg','u_time','u_res','u_mode','u_hasBg','u_debug'].forEach(n => {
     uLoc[n] = gl.getUniformLocation(prog, n);
   });
-
   function mkTex() {
     const t = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, t);
@@ -320,18 +279,14 @@ function initGL() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-      new Uint8Array([0,0,0,255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
     return t;
   }
-  texCam = mkTex();
-  texMask = mkTex();
-  texBg = mkTex();
+  texCam = mkTex(); texMask = mkTex(); texBg = mkTex();
   gl.uniform1i(uLoc.u_cam, 0);
   gl.uniform1i(uLoc.u_mask, 1);
   gl.uniform1i(uLoc.u_bg, 2);
   gl.uniform1f(uLoc.u_debug, 0.0);
-  L('WebGL OK');
   return true;
 }
 
@@ -373,10 +328,7 @@ function drawMask(lm) {
 
 let smoothPts = null;
 function smoothLandmarks(raw) {
-  if (!smoothPts) {
-    smoothPts = raw.map(p => ({ x: p.x, y: p.y, z: p.z }));
-    return smoothPts;
-  }
+  if (!smoothPts) { smoothPts = raw.map(p => ({ x: p.x, y: p.y, z: p.z })); return smoothPts; }
   const k = 0.45;
   for (let i = 0; i < raw.length; i++) {
     smoothPts[i].x += (raw[i].x - smoothPts[i].x) * k;
@@ -388,11 +340,28 @@ function smoothLandmarks(raw) {
 
 // ============ MEDIAPIPE ============
 let handsMP = null, modelReady = false, curLandmarks = null;
-let handBusy = false, sendCount = 0;
+let handBusy = false, sendCount = 0, sendErrors = 0;
+let lastSendError = '-', modelFilesOk = 0, modelFilesTotal = 0;
+let currentCDN = '';
 
-function createHands() {
+// Multiple CDN options for model files
+const CDN_LIST = [
+  'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
+  'https://unpkg.com/@mediapipe/hands',
+  'https://storage.googleapis.com/mediapipe-models/hands/hand_landmarker',
+];
+
+function tryCreateHands(cdnIndex) {
+  currentCDN = CDN_LIST[cdnIndex] || CDN_LIST[0];
+  L('Trying CDN:', currentCDN);
+
   handsMP = new Hands({
-    locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`,
+    locateFile: file => {
+      modelFilesTotal++;
+      const url = currentCDN + '/' + file;
+      L('Model file #' + modelFilesTotal + ':', url);
+      return url;
+    },
   });
   handsMP.setOptions({
     maxNumHands: 1,
@@ -401,7 +370,10 @@ function createHands() {
     minTrackingConfidence: 0.5,
   });
   handsMP.onResults(r => {
-    if (!modelReady) { modelReady = true; L('Model first frame OK'); }
+    if (!modelReady) {
+      modelReady = true;
+      L('MODEL READY from', currentCDN);
+    }
     if (r.multiHandLandmarks && r.multiHandLandmarks.length > 0) {
       curLandmarks = smoothLandmarks(r.multiHandLandmarks[0]);
     } else {
@@ -411,25 +383,25 @@ function createHands() {
   });
 }
 
-// ============ HAND DETECTION LOOP (key fix!) ============
+// Hand detection loop
 async function handLoop() {
-  if (!handsMP) { setTimeout(handLoop, 200); return; }
   if (!S.playing) return;
 
   const video = document.getElementById('cam');
 
-  if (video.readyState >= 2 && !handBusy) {
+  if (handsMP && video.readyState >= 2 && !handBusy) {
     handBusy = true;
     try {
       await handsMP.send({ image: video });
       sendCount++;
     } catch (e) {
-      if (sendCount === 0) L('Send error:', e.message);
+      sendErrors++;
+      lastSendError = e.message || String(e).substring(0, 80);
+      L('SEND ERROR #' + sendErrors + ':', lastSendError);
     }
     handBusy = false;
   }
 
-  // Run at ~30fps (33ms interval)
   setTimeout(handLoop, 33);
 }
 
@@ -452,37 +424,31 @@ async function startCam() {
     const timeout = setTimeout(() => reject(new Error('摄像头启动超时')), 10000);
     const check = () => {
       if (video.videoWidth > 0 && video.readyState >= 2) {
-        clearTimeout(timeout);
-        L('Video:', video.videoWidth, 'x', video.videoHeight);
-        resolve();
-      } else {
-        setTimeout(check, 200);
-      }
+        clearTimeout(timeout); resolve();
+      } else setTimeout(check, 200);
     };
     video.onloadeddata = () => check();
     check();
   });
-
-  return stream;
 }
 
 function configureCanvas() {
-  const video = document.getElementById('cam');
-  const out = document.getElementById('output');
-  out.width = video.videoWidth;
-  out.height = video.videoHeight;
-  maskCvs.width = Math.round(video.videoWidth * 0.5);
-  maskCvs.height = Math.round(video.videoHeight * 0.5);
-  blurCvs.width = Math.round(video.videoWidth * 0.5);
-  blurCvs.height = Math.round(video.videoHeight * 0.5);
+  const v = document.getElementById('cam'), o = document.getElementById('output');
+  o.width = v.videoWidth; o.height = v.videoHeight;
+  maskCvs.width = Math.round(v.videoWidth * 0.5);
+  maskCvs.height = Math.round(v.videoHeight * 0.5);
+  blurCvs.width = Math.round(v.videoWidth * 0.5);
+  blurCvs.height = Math.round(v.videoHeight * 0.5);
 }
 
 function waitForModel(timeout) {
   return new Promise(resolve => {
     const start = Date.now();
     const check = () => {
-      if (modelReady || Date.now() - start > timeout) resolve();
-      else setTimeout(check, 200);
+      if (modelReady || Date.now() - start > timeout) {
+        L('Model wait ended:', modelReady ? 'READY' : 'TIMEOUT', Date.now() - start + 'ms');
+        resolve();
+      } else setTimeout(check, 300);
     };
     check();
   });
@@ -495,33 +461,29 @@ let S = { mode: 0, recording: false, hasBg: false, playing: false, time: 0, last
 function render(ts) {
   if (!S.playing) return;
   requestAnimationFrame(render);
-
   const dt = S.lastTs ? (ts - S.lastTs) / 1000 : 0.016;
-  S.lastTs = ts;
-  S.time += dt;
-
+  S.lastTs = ts; S.time += dt;
   const video = document.getElementById('cam');
-
-  // FPS
   S.frames++;
   if (S.frames % 20 === 0) {
     S.fps = Math.round(1 / Math.max(dt, 0.001));
     document.getElementById('fps').textContent = S.fps + ' FPS';
   }
-
-  // Debug panel
   if (S.debug) {
     document.getElementById('d0').textContent = S.fps;
     document.getElementById('d1').textContent = video.readyState >= 2 ? 'OK' : 'rs=' + video.readyState;
     document.getElementById('d2').textContent = video.paused ? 'PAUSED' : 'PLAYING';
     document.getElementById('d3').textContent = video.videoWidth + 'x' + video.videoHeight;
     document.getElementById('d4').textContent = curLandmarks ? curLandmarks.length + ' pts' : 'null';
-    document.getElementById('d5').textContent = modelReady ? 'LOADED' : 'loading...';
+    document.getElementById('d5').textContent = modelReady ? 'READY' : 'loading...';
+    document.getElementById('d5').className = modelReady ? 'ok' : '';
     document.getElementById('d6').textContent = sendCount;
-    document.getElementById('d7').textContent = video.srcObject ? video.srcObject.getTracks().length : 0;
+    document.getElementById('d8').textContent = lastSendError;
+    document.getElementById('d8').className = sendErrors > 0 ? 'err' : '';
+    document.getElementById('d9').textContent = modelFilesOk + '/' + modelFilesTotal;
+    document.getElementById('d10').textContent = currentCDN.split('/').slice(0, 3).join('/');
   }
 
-  // Upload camera texture with Y flip
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texCam);
   if (video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
@@ -530,7 +492,6 @@ function render(ts) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   }
 
-  // Upload mask texture
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, texMask);
   if (curLandmarks) {
@@ -539,18 +500,15 @@ function render(ts) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, blurCvs);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   } else {
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-      new Uint8Array([0,0,0,255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
   }
 
-  // Uniforms
   gl.uniform1f(uLoc.u_time, S.time);
-  gl.uniform2f(uLoc.u_res, out.width, out.height);
+  gl.uniform2f(uLoc.u_res, document.getElementById('output').width, document.getElementById('output').height);
   gl.uniform1f(uLoc.u_mode, S.mode);
   gl.uniform1f(uLoc.u_hasBg, S.hasBg ? 1.0 : 0.0);
   gl.uniform1f(uLoc.u_debug, S.debug ? 1.0 : 0.0);
-
-  gl.viewport(0, 0, out.width, out.height);
+  gl.viewport(0, 0, document.getElementById('output').width, document.getElementById('output').height);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
@@ -563,19 +521,15 @@ function switchMode() {
   setTimeout(() => { el.style.borderColor = 'rgba(255,255,255,0.08)'; }, 300);
 }
 function screenshot() {
-  const f = document.createElement('div');
-  f.className = 'flash';
-  document.body.appendChild(f);
-  setTimeout(() => f.remove(), 400);
+  const f = document.createElement('div'); f.className = 'flash';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 400);
   setTimeout(() => {
     document.getElementById('output').toBlob(blob => {
       if (!blob) return;
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'glass_' + Date.now() + '.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      document.body.appendChild(a); a.click(); a.remove();
       showToast('截图已保存');
     }, 'image/png');
   }, 50);
@@ -583,8 +537,7 @@ function screenshot() {
 let recorder = null, chunks = [];
 function toggleRec() {
   if (S.recording) {
-    recorder.stop();
-    S.recording = false;
+    recorder.stop(); S.recording = false;
     document.getElementById('bRec').classList.remove('rec');
     document.getElementById('bRec').querySelector('.bl').textContent = '录屏';
     document.getElementById('rec-dot').style.display = 'none';
@@ -600,12 +553,9 @@ function toggleRec() {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob(chunks, { type: mime }));
       a.download = 'glass_' + Date.now() + '.webm';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      document.body.appendChild(a); a.click(); a.remove();
     };
-    recorder.start();
-    S.recording = true;
+    recorder.start(); S.recording = true;
     document.getElementById('bRec').classList.add('rec');
     document.getElementById('bRec').querySelector('.bl').textContent = '停止';
     document.getElementById('rec-dot').style.display = 'block';
@@ -614,8 +564,7 @@ function toggleRec() {
 }
 function uploadBg() { document.getElementById('bgIn').click(); }
 document.getElementById('bgIn').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const img = new Image();
   img.onload = () => {
     gl.activeTexture(gl.TEXTURE2);
@@ -626,11 +575,9 @@ document.getElementById('bgIn').addEventListener('change', e => {
     document.getElementById('bBg').querySelector('.bl').textContent = '背景 ✓';
     showToast('虚拟背景已启用');
   };
-  img.src = URL.createObjectURL(file);
-  e.target.value = '';
+  img.src = URL.createObjectURL(file); e.target.value = '';
 });
 
-// ============ EVENTS ============
 document.getElementById('bMode').addEventListener('click', switchMode);
 document.getElementById('bShot').addEventListener('click', screenshot);
 document.getElementById('bRec').addEventListener('click', toggleRec);
@@ -642,53 +589,105 @@ document.addEventListener('keydown', e => {
   else if (e.code === 'KeyR') toggleRec();
   else if (e.code === 'KeyB') uploadBg();
 });
-const dbgEl = document.getElementById('debug');
 document.getElementById('debugToggle').addEventListener('click', () => {
   S.debug = !S.debug;
-  dbgEl.classList.toggle('show', S.debug);
+  document.getElementById('debug').classList.toggle('show', S.debug);
 });
+
+// ============ CDN HEALTH CHECK ============
+async function checkCDN(url, timeout) {
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), timeout);
+    const r = await fetch(url, { method: 'HEAD', signal: ctrl.signal });
+    clearTimeout(tid);
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
+}
 
 // ============ INIT ============
 async function init() {
   try {
+    // 1. WebGL
     setProg(5, '初始化 WebGL...', 1);
     await wait(100);
     if (!initGL()) return;
-    setProg(20, 'WebGL 就绪', 1);
+    setProg(15, 'WebGL 就绪', 1);
 
-    setProg(28, '启动摄像头...', 4);
+    // 2. Camera
+    setProg(20, '启动摄像头...', 3);
     await wait(50);
     await startCam();
-    setProg(55, '摄像头就绪', 4);
+    setProg(45, '摄像头就绪', 3);
 
-    setProg(60, '初始化手部检测...', 3);
+    // 3. Check which CDN can reach model files
+    setProg(50, '检测模型 CDN 可用性...', 2);
     await wait(50);
-    createHands();
-    setProg(70, '画布配置...', 3);
+
+    let workingCDN = null;
+    for (let i = 0; i < CDN_LIST.length; i++) {
+      const testUrl = CDN_LIST[i] + '/hands.binarypb';
+      L('Testing CDN #' + i + ':', testUrl);
+      setProg(50 + i * 8, '检测 CDN: ' + CDN_LIST[i].split('/').slice(2, 3)[0] + '...', 2);
+      const ok = await checkCDN(testUrl, 6000);
+      L('CDN #' + i + ' result:', ok ? 'OK' : 'BLOCKED');
+      if (ok) { workingCDN = i; break; }
+    }
+
+    if (workingCDN === null) {
+      L('All CDNs failed!');
+      showErr('手部模型 CDN 全部无法访问',
+        '这通常是因为网络无法访问模型服务器。请尝试：<br><br>' +
+        '1. 检查网络连接是否正常<br>' +
+        '2. 如果使用代理/VPN，确保已开启<br>' +
+        '3. 手动下载模型文件并本地部署<br><br>' +
+        '需要的文件来自 @mediapipe/hands npm 包');
+      return;
+    }
+
+    // 4. Create Hands with working CDN
+    setProg(60, '加载手部检测引擎...', 2);
+    await wait(50);
+    tryCreateHands(workingCDN);
+
+    // 5. Configure canvas
     configureCanvas();
 
-    setProg(78, '等待模型加载...', 3);
-    await waitForModel(12000);
-    setProg(95, '启动检测循环...', 3);
+    // 6. Show debug button
+    document.getElementById('debugToggle').style.display = 'block';
 
-    // Start hand detection loop
+    // 7. Start detection loop immediately (send() triggers model download)
+    setProg(70, '下载模型文件 (可能需要 10-30 秒)...', 2);
+    S.playing = true; // Must be true for handLoop
+    requestAnimationFrame(render);
     handLoop();
+
+    // 8. Wait for model to actually load
+    setProg(80, '等待模型初始化...', 2);
+    await waitForModel(25000);
+
+    if (!modelReady) {
+      L('Model did not become ready in time');
+      // Still show app - maybe it just needs more time
+      showToast('模型加载较慢，继续等待中...');
+      await waitForModel(15000);
+    }
 
     setProg(100, '就绪!', 4);
     await wait(400);
 
     document.getElementById('loader').classList.add('hidden');
     document.getElementById('app').style.display = 'block';
-    document.getElementById('debugToggle').style.display = 'block';
-    S.playing = true;
-    requestAnimationFrame(render);
-    L('=== APP STARTED ===');
+    L('=== APP STARTED, CDN:', currentCDN, '===');
 
   } catch (err) {
     L('INIT ERR:', err);
     showErr(err.message);
   }
 }
+
 init();
 </script>
 </body>
