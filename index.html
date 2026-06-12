@@ -2,79 +2,299 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>液态玻璃 · 手部特效</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>液态玻璃 · 手部流体特效 | 镜像修复+边缘增强</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidden;width:100vw;height:100vh}
-#loader{position:fixed;inset:0;background:#0a0a12;display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .8s ease,visibility .8s}
-#loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.lc{text-align:center;width:min(380px,88vw)}
-.lt{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:.15em;background:linear-gradient(135deg,#ff6b9d,#c44dff,#4dabff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
-.ls{font-size:.65rem;letter-spacing:.5em;color:rgba(255,255,255,.3);margin-bottom:2.8rem}
-.pb{width:100%;height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:1.2rem}
-.pf{height:100%;width:0%;background:linear-gradient(90deg,#ff6b9d,#c44dff,#4dabff);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
-.ps{font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:.08em;min-height:1.4em;word-break:break-all}
-.pst{margin-top:2.2rem;display:flex;gap:1.5rem;justify-content:center}
-.psi{font-size:.58rem;letter-spacing:.08em;color:rgba(255,255,255,.15);transition:color .3s}
-.psi.active{color:rgba(255,255,255,.7)}
-.psi.done{color:#c44dff}
-#output{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#0a0a12}
-.hud{position:fixed;z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:6px;padding:6px 14px;font-size:.7rem;letter-spacing:.08em}
-#fps{top:16px;right:16px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.06)}
-#mode-hud{top:16px;left:16px;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.08);font-family:'Syne',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.1em}
-#rec-dot{top:16px;left:50%;transform:translateX(-50%);background:rgba(180,20,20,.6);border:1px solid rgba(255,60,60,.4);display:none;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);color:#fff;padding:8px 22px;border-radius:8px;font-size:.75rem;letter-spacing:.06em;backdrop-filter:blur(10px);z-index:200;animation:ta 2.2s ease forwards;pointer-events:none;border:1px solid rgba(255,255,255,.08);max-width:80vw;text-align:center}
-@keyframes ta{0%{opacity:0;transform:translateX(-50%) translateY(-6px)}8%{opacity:1;transform:translateX(-50%) translateY(0)}82%{opacity:1}100%{opacity:0}}
-.flash{position:fixed;inset:0;background:#fff;z-index:300;animation:fl .35s ease forwards;pointer-events:none}
-@keyframes fl{0%{opacity:.7}100%{opacity:0}}
-#ctrls{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:100;flex-wrap:wrap;justify-content:center;padding:0 16px}
-.cb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:all .22s cubic-bezier(.4,0,.2,1);font-family:'DM Mono',monospace;user-select:none;min-width:60px}
-.cb:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
-.cb:active{transform:translateY(0);transition-duration:.1s}
-.cb.rec{background:rgba(220,40,40,.25);border-color:rgba(255,60,60,.5);animation:rp 1.5s ease infinite}
-@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(255,60,60,.3)}50%{box-shadow:0 0 0 6px rgba(255,60,60,0)}}
-.bi{font-size:1.1rem;line-height:1}
-.bl{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;opacity:.65}
-.cb.on .bl{color:#4dabff}
-#kbd{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);display:flex;gap:14px;z-index:90;opacity:.25;font-size:.53rem;color:rgba(255,255,255,.5)}
-.kbd{display:inline-block;padding:1px 5px;border:1px solid rgba(255,255,255,.2);border-radius:3px;font-family:'DM Mono',monospace;margin-right:2px}
-#debug{position:fixed;top:50px;right:16px;background:rgba(0,0,0,.82);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.55rem;letter-spacing:.03em;z-index:100;min-width:280px;line-height:1.85;display:none}
-#debug.show{display:block}
-#debug .err{color:#ff6b6b}
-#debug .ok{color:#6bffa1}
-#debugToggle{position:fixed;bottom:22px;right:16px;z-index:100;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;font-size:.65rem;font-family:'DM Mono',monospace;display:none}
-#error{position:fixed;inset:0;background:#0a0a12;display:none;align-items:center;justify-content:center;z-index:2000;flex-direction:column;gap:16px;text-align:center;padding:24px}
-#error.show{display:flex}
-#error h2{font-family:'Syne',sans-serif;font-size:1.4rem;color:#ff6b9d}
-#error p{color:rgba(255,255,255,.5);font-size:.78rem;max-width:440px;line-height:1.7}
-#error .fix{margin-top:12px;text-align:left;background:rgba(255,255,255,.05);border-radius:8px;padding:16px;font-size:.7rem;line-height:1.8;border:1px solid rgba(255,255,255,.08)}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+body {
+  background: #0a0a12;
+  font-family: 'DM Mono', monospace;
+  color: #fff;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+#loader {
+  position: fixed;
+  inset: 0;
+  background: #0a0a12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+#loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-content {
+  text-align: center;
+  width: min(360px, 85vw);
+}
+.loader-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, #ff6b9d, #c44dff, #4dabff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.3rem;
+}
+.loader-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 2.8rem;
+}
+.pbar {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+.pfill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff6b9d, #c44dff, #4dabff);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pstatus {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.08em;
+  min-height: 1.4em;
+}
+.psteps {
+  margin-top: 2.2rem;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+.pstep {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.15);
+  transition: color 0.3s;
+}
+.pstep.active { color: rgba(255, 255, 255, 0.7); }
+.pstep.done { color: #c44dff; }
+
+#output {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  background: #0a0a12;
+}
+.hud {
+  position: fixed;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+#fps {
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+#mode-hud {
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+#rec-dot {
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 40, 40, 0.75);
+  border: 1px solid rgba(255, 60, 60, 0.5);
+  display: none;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.toast {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  animation: ta 2.2s ease forwards;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+@keyframes ta {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  8% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 300;
+  animation: fl 0.35s ease forwards;
+  pointer-events: none;
+}
+@keyframes fl {
+  0% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+#ctrls {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 16px;
+}
+.cbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'DM Mono', monospace;
+  min-width: 60px;
+}
+.cbtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+.cbtn:active { transform: translateY(0); }
+.cbtn.rec {
+  background: rgba(220, 40, 40, 0.3);
+  border-color: rgba(255, 60, 60, 0.7);
+  animation: rp 1.2s infinite;
+}
+@keyframes rp {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 60, 60, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 60, 60, 0); }
+}
+.bi { font-size: 1.1rem; line-height: 1; }
+.bl { font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.cbtn.on .bl { color: #4dabff; }
+#kbd {
+  position: fixed;
+  bottom: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+  z-index: 90;
+  opacity: 0.3;
+  font-size: 0.53rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+}
+.kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  font-family: 'DM Mono', monospace;
+  margin-right: 2px;
+}
+#error {
+  position: fixed;
+  inset: 0;
+  background: #0a0a12;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+  padding: 24px;
+}
+#error.show { display: flex; }
+#error h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  color: #ff6b9d;
+}
+#error p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  max-width: 420px;
+  line-height: 1.7;
+}
 </style>
 </head>
 <body>
 
 <div id="loader">
-  <div class="lc">
-    <div class="lt">液态玻璃</div>
-    <div class="ls">LIQUID GLASS</div>
-    <div class="pb"><div class="pf" id="pf"></div></div>
-    <div class="ps" id="ps">初始化中...</div>
-    <div class="pst">
-      <span class="psi" id="s1">WebGL</span>
-      <span class="psi" id="s2">模型</span>
-      <span class="psi" id="s3">摄像头</span>
-      <span class="psi" id="s4">就绪</span>
+  <div class="loader-content">
+    <div class="loader-title">液态玻璃</div>
+    <div class="loader-sub">LIQUID GLASS</div>
+    <div class="pbar"><div class="pfill" id="pfill"></div></div>
+    <div class="pstatus" id="pstatus">初始化中...</div>
+    <div class="psteps">
+      <span class="pstep" id="s1">WebGL</span>
+      <span class="pstep" id="s2">脚本</span>
+      <span class="pstep" id="s3">模型</span>
+      <span class="pstep" id="s4">摄像头</span>
     </div>
   </div>
 </div>
 
-<div id="error"><h2>初始化失败</h2><p id="emsg"></p><div class="fix" id="efix" style="display:none"></div></div>
+<div id="error"><h2>初始化失败</h2><p id="emsg"></p></div>
 
 <div id="app" style="display:none">
-  <video id="cam" playsinline muted autoplay style="display:none"></video>
+  <video id="cam" playsinline style="display:none"></video>
   <canvas id="maskC" style="display:none"></canvas>
   <canvas id="blurC" style="display:none"></canvas>
   <canvas id="output"></canvas>
@@ -88,60 +308,65 @@ body{background:#0a0a12;font-family:'DM Mono',monospace;color:#fff;overflow:hidd
     <span><span class="kbd">B</span>背景</span>
   </div>
   <div id="ctrls">
-    <button class="cb" id="bMode"><span class="bi">✦</span><span class="bl">切换</span></button>
-    <button class="cb" id="bShot"><span class="bi">◉</span><span class="bl">截图</span></button>
-    <button class="cb" id="bRec"><span class="bi">●</span><span class="bl">录屏</span></button>
-    <button class="cb" id="bBg"><span class="bi">▣</span><span class="bl">背景</span></button>
+    <button class="cbtn" id="bMode"><span class="bi">✦</span><span class="bl">切换</span></button>
+    <button class="cbtn" id="bShot"><span class="bi">◉</span><span class="bl">截图</span></button>
+    <button class="cbtn" id="bRec"><span class="bi">●</span><span class="bl">录屏</span></button>
+    <button class="cbtn" id="bBg"><span class="bi">▣</span><span class="bl">背景</span></button>
     <input type="file" id="bgIn" accept="image/*" style="display:none">
   </div>
-  <div id="debug">
-    <div>fps: <span id="d0">-</span></div>
-    <div>video: <span id="d1">-</span></div>
-    <div>playing: <span id="d2">-</span></div>
-    <div>size: <span id="d3">-</span></div>
-    <div>hand: <span id="d4">-</span></div>
-    <div>model: <span id="d5">-</span></div>
-    <div>sends: <span id="d6">-</span></div>
-    <div>sendErr: <span id="d8">-</span></div>
-    <div>files: <span id="d9">-</span></div>
-    <div>cdn: <span id="d10">-</span></div>
-  </div>
 </div>
-<button id="debugToggle">D</button>
 
 <script>
 "use strict";
-const L = (...a) => console.log('[G]', ...a);
 
-function setProg(pct, txt, step) {
-  document.getElementById('pf').style.width = pct + '%';
-  document.getElementById('ps').textContent = txt || '';
-  if (step !== undefined) for (let i = 1; i <= 4; i++) {
-    const el = document.getElementById('s' + i);
-    el.classList.toggle('done', i < step);
-    el.classList.toggle('active', i === step);
+// ============================================================
+//  LOGGING & UI
+// ============================================================
+const LOG = (...a) => console.log('[Glass]', ...a);
+
+function setProgress(pct, text, step) {
+  const fill = document.getElementById('pfill');
+  if (fill) fill.style.width = pct + '%';
+  const statusDiv = document.getElementById('pstatus');
+  if (statusDiv) statusDiv.textContent = text || '';
+  if (step !== undefined) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('s' + i);
+      if (el) {
+        el.classList.toggle('done', i < step);
+        el.classList.toggle('active', i === step);
+      }
+    }
   }
 }
-function showErr(msg, fix) {
-  document.getElementById('emsg').textContent = msg;
-  if (fix) { document.getElementById('efix').innerHTML = fix; document.getElementById('efix').style.display = 'block'; }
-  document.getElementById('error').classList.add('show');
-  document.getElementById('loader').classList.add('hidden');
+
+function showError(msg) {
+  const errDiv = document.getElementById('error');
+  const errMsg = document.getElementById('emsg');
+  if (errMsg) errMsg.textContent = msg;
+  if (errDiv) errDiv.classList.add('show');
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.add('hidden');
+  LOG('ERROR:', msg);
 }
+
 function showToast(t) {
   const d = document.createElement('div');
   d.className = 'toast';
   d.textContent = t;
   document.body.appendChild(d);
-  setTimeout(() => d.remove(), 2300);
+  setTimeout(() => d.remove(), 2200);
 }
-const wait = ms => new Promise(r => setTimeout(r, ms));
 
-// ============ SHADERS ============
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ============================================================
+//  ENHANCED SHADER (Fixed: mirror consistency + mask-res edge)
+// ============================================================
 const VERT = `
 attribute vec2 a_pos;
 varying vec2 v_uv;
-void main(){
+void main() {
   v_uv = a_pos * 0.5 + 0.5;
   gl_Position = vec4(a_pos, 0.0, 1.0);
 }`;
@@ -153,126 +378,168 @@ uniform sampler2D u_mask;
 uniform sampler2D u_bg;
 uniform float u_time;
 uniform vec2 u_res;
+uniform vec2 u_maskRes;      // fix edge detection resolution
 uniform float u_mode;
 uniform float u_hasBg;
-uniform float u_debug;
 varying vec2 v_uv;
 
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float noise(vec2 p){
-  vec2 i=floor(p),f=fract(p);
-  f=f*f*(3.0-2.0*f);
-  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
-             mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1,0)), f.x),
+             mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), f.x), f.y);
 }
-float fbm(vec2 p){
-  float v=0.0,a=0.5;
-  for(int i=0;i<5;i++){v+=a*noise(p);p*=2.0;a*=0.5;}
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for(int i = 0; i < 5; i++) { v += a * noise(p); p *= 2.0; a *= 0.5; }
   return v;
 }
-float edge(vec2 uv,float r){
-  vec2 px=vec2(r/u_res.x,0.0),py=vec2(0.0,r/u_res.y);
-  float l=texture2D(u_mask,uv-px).r,ri=texture2D(u_mask,uv+px).r;
-  float t2=texture2D(u_mask,uv-py).r,b=texture2D(u_mask,uv+py).r;
-  return length(vec2(ri-l,b-t2));
+
+// Accurate edge detection using mask texture resolution
+float edgeMask(vec2 uv, float radius) {
+  vec2 stepXY = vec2(radius) / u_maskRes;
+  float l = texture2D(u_mask, uv - vec2(stepXY.x, 0.0)).r;
+  float r = texture2D(u_mask, uv + vec2(stepXY.x, 0.0)).r;
+  float t = texture2D(u_mask, uv - vec2(0.0, stepXY.y)).r;
+  float b = texture2D(u_mask, uv + vec2(0.0, stepXY.y)).r;
+  return length(vec2(r - l, b - t));
 }
-void main(){
-  vec2 uv=v_uv;
-  vec2 cuv=vec2(1.0-uv.x,uv.y);
-  vec4 camCol=texture2D(u_cam,cuv);
-  vec2 muv=vec2(1.0-uv.x,uv.y);
-  float m=texture2D(u_mask,muv).r;
-  m=smoothstep(0.02,0.45,m);
-  float t=u_time;
-  if(u_debug>0.5){gl_FragColor=camCol;return;}
-  vec2 baseUV=u_hasBg>0.5?uv:cuv;
-  vec4 bg=u_hasBg>0.5?texture2D(u_bg,uv):camCol;
-  if(u_mode<0.5){
-    vec2 np=uv*4.0;float n1=fbm(np+t*0.22);float nc=n1;
-    float nr=fbm(np+vec2(0.008,0.0)+t*0.22);
-    float nt=fbm(np+vec2(0.0,0.008)+t*0.22);
-    vec2 grad=vec2(nr-nc,nt-nc);
-    vec2 ruv=baseUV+grad*m*0.018;
-    float ca=m*0.004+edge(muv,2.0)*0.008;
+
+void main() {
+  // Mirror UV (front camera natural feel) -> both mask & background use mirrored uv for consistency
+  vec2 uvMirror = vec2(1.0 - v_uv.x, v_uv.y);
+  
+  float m = texture2D(u_mask, uvMirror).r;
+  m = smoothstep(0.02, 0.48, m);        // softer hand mask transition
+  
+  // Background: if custom bg exists → use mirrored uv for same orientation, else use camera (mirrored)
+  vec4 bgColor;
+  if (u_hasBg > 0.5) {
+    bgColor = texture2D(u_bg, uvMirror);
+  } else {
+    bgColor = texture2D(u_cam, uvMirror);
+  }
+  
+  float t = u_time;
+  
+  // ========= MODE 0 : LIQUID GLASS (refractive + chromatic) =========
+  if (u_mode < 0.5) {
+    vec2 np = uvMirror * 4.0;
+    float n1 = fbm(np + t * 0.22);
+    float nc = fbm(np + t * 0.22);
+    float nr = fbm(np + vec2(0.008, 0.0) + t * 0.22);
+    float nt = fbm(np + vec2(0.0, 0.008) + t * 0.22);
+    vec2 grad = vec2(nr - nc, nt - nc);
+    vec2 refractUV = uvMirror + grad * m * 0.018;
+    float ca = m * 0.004 + edgeMask(uvMirror, 2.0) * 0.008;
+    
     vec3 col;
-    if(u_hasBg>0.5){
-      col.r=texture2D(u_bg,ruv+vec2(ca,0.0)).r;
-      col.g=texture2D(u_bg,ruv).g;
-      col.b=texture2D(u_bg,ruv-vec2(ca,0.0)).b;
-    }else{
-      col.r=texture2D(u_cam,ruv+vec2(ca,0.0)).r;
-      col.g=texture2D(u_cam,ruv).g;
-      col.b=texture2D(u_cam,ruv-vec2(ca,0.0)).b;
+    if (u_hasBg > 0.5) {
+      col.r = texture2D(u_bg, refractUV + vec2(ca, 0.0)).r;
+      col.g = texture2D(u_bg, refractUV).g;
+      col.b = texture2D(u_bg, refractUV - vec2(ca, 0.0)).b;
+    } else {
+      col.r = texture2D(u_cam, refractUV + vec2(ca, 0.0)).r;
+      col.g = texture2D(u_cam, refractUV).g;
+      col.b = texture2D(u_cam, refractUV - vec2(ca, 0.0)).b;
     }
-    float e=edge(muv,1.5);
-    float pulse=0.7+0.3*sin(t*2.5+n1*5.0);
-    col+=e*vec3(0.92,0.96,1.0)*pulse*2.8;
-    float spec=pow(max(0.0,1.0-abs(n1-0.5)*4.0),5.0);
-    col+=spec*m*0.14;
-    col*=mix(vec3(1.0),vec3(1.03,0.98,0.96),m*0.35);
-    gl_FragColor=mix(bg,vec4(col,1.0),m);
-  }else if(u_mode<1.5){
-    float e=edge(muv,2.0);e=smoothstep(0.0,0.6,e);
-    float g=edge(muv,5.0);g=smoothstep(0.0,0.4,g);
-    float n=fbm(uv*5.0+t*0.3);float hue=t*0.4+n*0.3;
-    vec3 neon=0.5+0.5*cos(6.28318*(hue+vec3(0.0,0.33,0.67)));
-    float pulse=0.6+0.4*sin(t*3.0+n*4.0);
-    vec3 res=bg.rgb;
-    res+=g*neon*pulse*1.2;res+=e*neon*pulse*3.5;res+=m*neon*pulse*0.06;
-    gl_FragColor=vec4(res,1.0);
-  }else{
-    float e=edge(muv,1.5);float g=edge(muv,4.0);
-    float field=fbm(uv*6.0+t*0.4);
-    float ep=0.5+0.5*sin(t*4.0+field*6.283);
-    vec3 ec=mix(vec3(1.0,0.45,0.08),vec3(1.0,0.92,0.3),ep);
-    vec3 res=bg.rgb;
-    res+=smoothstep(0.0,0.5,g)*ec*ep*1.6;
-    res+=smoothstep(0.0,0.6,e)*ec*3.2;
-    float inner=fbm(uv*8.0+t*0.6);
-    res+=m*inner*0.14*ec*(0.5+0.5*sin(t*5.0));
-    for(int i=0;i<4;i++){float fi=float(i);
-      vec2 puv=uv*(10.0+fi*3.0)+vec2(t*(0.2+fi*0.1));
-      float p=step(0.93,noise(puv));res+=p*m*ec*0.55;}
-    gl_FragColor=vec4(res,1.0);
+    
+    float edgeGlow = edgeMask(uvMirror, 1.8);
+    float pulse = 0.7 + 0.3 * sin(t * 2.5 + n1 * 5.0);
+    col += edgeGlow * vec3(0.92, 0.96, 1.0) * pulse * 2.6;
+    float spec = pow(max(0.0, 1.0 - abs(n1 - 0.5) * 4.0), 5.0);
+    col += spec * m * 0.14;
+    col *= mix(vec3(1.0), vec3(1.03, 0.98, 0.96), m * 0.35);
+    gl_FragColor = mix(bgColor, vec4(col, 1.0), m);
+    
+  // ========= MODE 1 : NEON EDGE =========
+  } else if (u_mode < 1.5) {
+    float e = edgeMask(uvMirror, 2.0);
+    e = smoothstep(0.0, 0.65, e);
+    float g = edgeMask(uvMirror, 5.0);
+    g = smoothstep(0.0, 0.45, g);
+    float n = fbm(uvMirror * 5.0 + t * 0.3);
+    float hue = t * 0.4 + n * 0.3;
+    vec3 neon = 0.5 + 0.5 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
+    float pulse = 0.6 + 0.4 * sin(t * 3.0 + n * 4.0);
+    vec3 result = bgColor.rgb;
+    result += g * neon * pulse * 1.3;
+    result += e * neon * pulse * 3.8;
+    result += m * neon * pulse * 0.08;
+    gl_FragColor = vec4(result, 1.0);
+    
+  // ========= MODE 2 : ENERGY SHIELD =========
+  } else {
+    float e = edgeMask(uvMirror, 1.6);
+    float g = edgeMask(uvMirror, 4.5);
+    float field = fbm(uvMirror * 6.0 + t * 0.4);
+    float ep = 0.5 + 0.5 * sin(t * 4.0 + field * 6.283);
+    vec3 ec = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.92, 0.3), ep);
+    vec3 result = bgColor.rgb;
+    result += smoothstep(0.0, 0.55, g) * ec * ep * 1.7;
+    result += smoothstep(0.0, 0.7, e) * ec * 3.5;
+    float inner = fbm(uvMirror * 8.0 + t * 0.6);
+    result += m * inner * 0.16 * ec * (0.5 + 0.5 * sin(t * 5.0));
+    for(int i = 0; i < 4; i++) {
+      float fi = float(i);
+      vec2 puv = uvMirror * (10.0 + fi * 3.0) + vec2(t * (0.2 + fi * 0.1));
+      float p = step(0.93, noise(puv));
+      result += p * m * ec * 0.62;
+    }
+    gl_FragColor = vec4(result, 1.0);
   }
 }`;
 
-// ============ WEBGL ============
+// ============================================================
+//  WEBGL SETUP
+// ============================================================
 let gl, prog, uLoc = {};
 let texCam, texMask, texBg;
 
 function initGL() {
-  const c = document.getElementById('output');
-  gl = c.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
-  if (!gl) { showErr('浏览器不支持 WebGL'); return false; }
-  function mk(type, src) {
+  const canvas = document.getElementById('output');
+  gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
+  if (!gl) { showError('浏览器不支持 WebGL'); return false; }
+  
+  function createShader(type, src) {
     const s = gl.createShader(type);
-    gl.shaderSource(s, src); gl.compileShader(s);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      showErr('Shader: ' + gl.getShaderInfoLog(s)); return null;
+      const info = gl.getShaderInfoLog(s);
+      LOG('Shader compile error:', info);
+      showError('Shader 编译失败: ' + info);
+      return null;
     }
     return s;
   }
-  const vs = mk(gl.VERTEX_SHADER, VERT);
-  const fs = mk(gl.FRAGMENT_SHADER, FRAG);
+  
+  const vs = createShader(gl.VERTEX_SHADER, VERT);
+  const fs = createShader(gl.FRAGMENT_SHADER, FRAG);
   if (!vs || !fs) return false;
+  
   prog = gl.createProgram();
-  gl.attachShader(prog, vs); gl.attachShader(prog, fs);
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-    showErr('Link: ' + gl.getProgramInfoLog(prog)); return false;
+    showError('Shader 链接失败: ' + gl.getProgramInfoLog(prog));
+    return false;
   }
   gl.useProgram(prog);
+  
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
-  const aP = gl.getAttribLocation(prog, 'a_pos');
-  gl.enableVertexAttribArray(aP);
-  gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
-  ['u_cam','u_mask','u_bg','u_time','u_res','u_mode','u_hasBg','u_debug'].forEach(n => {
-    uLoc[n] = gl.getUniformLocation(prog, n);
-  });
-  function mkTex() {
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+  
+  const uniforms = ['u_cam','u_mask','u_bg','u_time','u_res','u_mode','u_hasBg','u_maskRes'];
+  uniforms.forEach(n => { uLoc[n] = gl.getUniformLocation(prog, n); });
+  
+  function createDefaultTex() {
     const t = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -282,413 +549,414 @@ function initGL() {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
     return t;
   }
-  texCam = mkTex(); texMask = mkTex(); texBg = mkTex();
+  texCam = createDefaultTex();
+  texMask = createDefaultTex();
+  texBg = createDefaultTex();
   gl.uniform1i(uLoc.u_cam, 0);
   gl.uniform1i(uLoc.u_mask, 1);
   gl.uniform1i(uLoc.u_bg, 2);
-  gl.uniform1f(uLoc.u_debug, 0.0);
   return true;
 }
 
-// ============ HAND MASK ============
+// ============================================================
+//  HAND MASK (smooth & blurred)
+// ============================================================
 const CONNS = [
   [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
   [5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],
-  [15,16],[13,17],[17,18],[18,19],[19,20],[0,17],
+  [15,16],[13,17],[17,18],[18,19],[19,20],[0,17]
 ];
-const maskCvs = document.getElementById('maskC');
-const blurCvs = document.getElementById('blurC');
-const maskCtx = maskCvs.getContext('2d');
-const blurCtx = blurCvs.getContext('2d');
+const maskCanvas = document.getElementById('maskC');
+const blurCanvas = document.getElementById('blurC');
+const maskCtx = maskCanvas.getContext('2d');
+const blurCtx = blurCanvas.getContext('2d');
 
-function drawMask(lm) {
-  const w = maskCvs.width, h = maskCvs.height;
+function drawMask(landmarks) {
+  const w = maskCanvas.width, h = maskCanvas.height;
   maskCtx.clearRect(0, 0, w, h);
   maskCtx.fillStyle = '#fff';
   maskCtx.strokeStyle = '#fff';
-  maskCtx.lineWidth = 38;
+  maskCtx.lineWidth = Math.max(28, w * 0.045);
   maskCtx.lineCap = 'round';
   maskCtx.lineJoin = 'round';
   CONNS.forEach(([a, b]) => {
     maskCtx.beginPath();
-    maskCtx.moveTo(lm[a].x * w, lm[a].y * h);
-    maskCtx.lineTo(lm[b].x * w, lm[b].y * h);
+    maskCtx.moveTo(landmarks[a].x * w, landmarks[a].y * h);
+    maskCtx.lineTo(landmarks[b].x * w, landmarks[b].y * h);
     maskCtx.stroke();
   });
-  lm.forEach(p => {
+  landmarks.forEach(p => {
     maskCtx.beginPath();
-    maskCtx.arc(p.x * w, p.y * h, 20, 0, Math.PI * 2);
+    maskCtx.arc(p.x * w, p.y * h, Math.max(16, w * 0.028), 0, Math.PI * 2);
     maskCtx.fill();
   });
-  blurCtx.clearRect(0, 0, blurCvs.width, blurCvs.height);
-  blurCtx.filter = 'blur(18px)';
-  blurCtx.drawImage(maskCvs, 0, 0, blurCvs.width, blurCvs.height);
+  blurCtx.clearRect(0, 0, blurCanvas.width, blurCanvas.height);
+  blurCtx.filter = 'blur(20px)';
+  blurCtx.drawImage(maskCanvas, 0, 0, blurCanvas.width, blurCanvas.height);
   blurCtx.filter = 'none';
 }
 
-let smoothPts = null;
+let smoothPoints = null;
 function smoothLandmarks(raw) {
-  if (!smoothPts) { smoothPts = raw.map(p => ({ x: p.x, y: p.y, z: p.z })); return smoothPts; }
-  const k = 0.45;
-  for (let i = 0; i < raw.length; i++) {
-    smoothPts[i].x += (raw[i].x - smoothPts[i].x) * k;
-    smoothPts[i].y += (raw[i].y - smoothPts[i].y) * k;
-    smoothPts[i].z += (raw[i].z - smoothPts[i].z) * k;
+  if (!smoothPoints) {
+    smoothPoints = raw.map(p => ({ x: p.x, y: p.y, z: p.z }));
+    return smoothPoints;
   }
-  return smoothPts;
+  const k = 0.48;
+  for (let i = 0; i < raw.length; i++) {
+    smoothPoints[i].x += (raw[i].x - smoothPoints[i].x) * k;
+    smoothPoints[i].y += (raw[i].y - smoothPoints[i].y) * k;
+    smoothPoints[i].z += (raw[i].z - smoothPoints[i].z) * k;
+  }
+  return smoothPoints;
 }
 
-// ============ MEDIAPIPE ============
-let handsMP = null, modelReady = false, curLandmarks = null;
-let handBusy = false, sendCount = 0, sendErrors = 0;
-let lastSendError = '-', modelFilesOk = 0, modelFilesTotal = 0;
-let currentCDN = '';
-
-// Multiple CDN options for model files
-const CDN_LIST = [
-  'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
-  'https://unpkg.com/@mediapipe/hands',
-  'https://storage.googleapis.com/mediapipe-models/hands/hand_landmarker',
-];
-
-function tryCreateHands(cdnIndex) {
-  currentCDN = CDN_LIST[cdnIndex] || CDN_LIST[0];
-  L('Trying CDN:', currentCDN);
-
-  handsMP = new Hands({
-    locateFile: file => {
-      modelFilesTotal++;
-      const url = currentCDN + '/' + file;
-      L('Model file #' + modelFilesTotal + ':', url);
-      return url;
-    },
+// ============================================================
+//  DYNAMIC SCRIPT LOADER (CDN fallback)
+// ============================================================
+function loadScript(url, timeout = 12000) {
+  return new Promise((resolve, reject) => {
+    if (url.includes('hands') && typeof Hands !== 'undefined') { resolve(); return; }
+    if (url.includes('camera_utils') && typeof Camera !== 'undefined') { resolve(); return; }
+    const timer = setTimeout(() => reject(new Error(`Timeout: ${url}`)), timeout);
+    const script = document.createElement('script');
+    script.src = url;
+    script.crossOrigin = 'anonymous';
+    script.onload = () => { clearTimeout(timer); resolve(); };
+    script.onerror = () => { clearTimeout(timer); reject(new Error(`Failed: ${url}`)); };
+    document.head.appendChild(script);
   });
-  handsMP.setOptions({
+}
+
+const CDN_LIST = ['https://cdn.jsdelivr.net/npm', 'https://unpkg.com'];
+async function loadMediaPipe(pkg) {
+  for (const base of CDN_LIST) {
+    try {
+      const url = `${base}/@mediapipe/${pkg}/${pkg}.js`;
+      await loadScript(url, 14000);
+      LOG(`${pkg} loaded from ${base}`);
+      return;
+    } catch (e) {
+      LOG(`CDN ${base} failed for ${pkg}:`, e.message);
+    }
+  }
+  throw new Error(`无法加载 ${pkg}，请检查网络后刷新`);
+}
+
+// ============================================================
+//  MEDIAPIPE HANDS
+// ============================================================
+let handsInstance = null;
+let modelFirstFrame = false;
+let currentLandmarks = null;
+
+function createHandsPipeline() {
+  LOG('Initializing MediaPipe Hands...');
+  handsInstance = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+  });
+  handsInstance.setOptions({
     maxNumHands: 1,
     modelComplexity: 1,
-    minDetectionConfidence: 0.7,
+    minDetectionConfidence: 0.65,
     minTrackingConfidence: 0.5,
   });
-  handsMP.onResults(r => {
-    if (!modelReady) {
-      modelReady = true;
-      L('MODEL READY from', currentCDN);
+  handsInstance.onResults(results => {
+    if (!modelFirstFrame && results.multiHandLandmarks) {
+      modelFirstFrame = true;
+      LOG('Hand model active');
     }
-    if (r.multiHandLandmarks && r.multiHandLandmarks.length > 0) {
-      curLandmarks = smoothLandmarks(r.multiHandLandmarks[0]);
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      currentLandmarks = smoothLandmarks(results.multiHandLandmarks[0]);
     } else {
-      curLandmarks = null;
-      smoothPts = null;
+      currentLandmarks = null;
+      smoothPoints = null;
     }
   });
 }
 
-// Hand detection loop
-async function handLoop() {
-  if (!S.playing) return;
+// ============================================================
+//  CAMERA & VIDEO
+// ============================================================
+let cameraController = null;
 
-  const video = document.getElementById('cam');
-
-  if (handsMP && video.readyState >= 2 && !handBusy) {
-    handBusy = true;
-    try {
-      await handsMP.send({ image: video });
-      sendCount++;
-    } catch (e) {
-      sendErrors++;
-      lastSendError = e.message || String(e).substring(0, 80);
-      L('SEND ERROR #' + sendErrors + ':', lastSendError);
-    }
-    handBusy = false;
-  }
-
-  setTimeout(handLoop, 33);
+async function initCamera() {
+  const videoEl = document.getElementById('cam');
+  cameraController = new Camera(videoEl, {
+    onFrame: async () => {
+      if (handsInstance) await handsInstance.send({ image: videoEl });
+    },
+    width: 1280,
+    height: 720,
+  });
+  await cameraController.start();
+  LOG('Camera stream active');
 }
 
-// ============ CAMERA ============
-async function startCam() {
-  const video = document.getElementById('cam');
-  video.muted = true;
-  video.autoplay = true;
-  video.playsInline = true;
-
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-    audio: false,
-  });
-
-  video.srcObject = stream;
-  await video.play();
-
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('摄像头启动超时')), 10000);
+function waitForVideoReady() {
+  return new Promise((resolve, reject) => {
+    const video = document.getElementById('cam');
+    const timeout = setTimeout(() => reject(new Error('摄像头无数据流')), 10000);
     const check = () => {
-      if (video.videoWidth > 0 && video.readyState >= 2) {
-        clearTimeout(timeout); resolve();
-      } else setTimeout(check, 200);
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        clearTimeout(timeout);
+        LOG(`Video dimensions: ${video.videoWidth}x${video.videoHeight}`);
+        resolve();
+      } else {
+        requestAnimationFrame(check);
+      }
     };
-    video.onloadeddata = () => check();
+    video.onloadedmetadata = check;
     check();
   });
 }
 
-function configureCanvas() {
-  const v = document.getElementById('cam'), o = document.getElementById('output');
-  o.width = v.videoWidth; o.height = v.videoHeight;
-  maskCvs.width = Math.round(v.videoWidth * 0.5);
-  maskCvs.height = Math.round(v.videoHeight * 0.5);
-  blurCvs.width = Math.round(v.videoWidth * 0.5);
-  blurCvs.height = Math.round(v.videoHeight * 0.5);
-}
-
-function waitForModel(timeout) {
+function waitForModelReady(ms = 11000) {
   return new Promise(resolve => {
     const start = Date.now();
     const check = () => {
-      if (modelReady || Date.now() - start > timeout) {
-        L('Model wait ended:', modelReady ? 'READY' : 'TIMEOUT', Date.now() - start + 'ms');
+      if (modelFirstFrame || Date.now() - start > ms) {
+        LOG(`Model ready state: ${modelFirstFrame}`);
         resolve();
-      } else setTimeout(check, 300);
+      } else {
+        setTimeout(check, 150);
+      }
     };
     check();
   });
 }
 
-// ============ RENDER ============
-const MODES = [{ name: '液态玻璃' }, { name: '霓虹描边' }, { name: '能量护盾' }];
-let S = { mode: 0, recording: false, hasBg: false, playing: false, time: 0, lastTs: 0, frames: 0, fps: 0, debug: false };
-
-function render(ts) {
-  if (!S.playing) return;
-  requestAnimationFrame(render);
-  const dt = S.lastTs ? (ts - S.lastTs) / 1000 : 0.016;
-  S.lastTs = ts; S.time += dt;
+function resizeCanvases() {
   const video = document.getElementById('cam');
-  S.frames++;
-  if (S.frames % 20 === 0) {
-    S.fps = Math.round(1 / Math.max(dt, 0.001));
-    document.getElementById('fps').textContent = S.fps + ' FPS';
+  const outCanvas = document.getElementById('output');
+  const w = video.videoWidth, h = video.videoHeight;
+  if (w && h) {
+    outCanvas.width = w;
+    outCanvas.height = h;
+    maskCanvas.width = Math.round(w * 0.5);
+    maskCanvas.height = Math.round(h * 0.5);
+    blurCanvas.width = Math.round(w * 0.5);
+    blurCanvas.height = Math.round(h * 0.5);
+    LOG(`Canvas resized: ${w}x${h}`);
   }
-  if (S.debug) {
-    document.getElementById('d0').textContent = S.fps;
-    document.getElementById('d1').textContent = video.readyState >= 2 ? 'OK' : 'rs=' + video.readyState;
-    document.getElementById('d2').textContent = video.paused ? 'PAUSED' : 'PLAYING';
-    document.getElementById('d3').textContent = video.videoWidth + 'x' + video.videoHeight;
-    document.getElementById('d4').textContent = curLandmarks ? curLandmarks.length + ' pts' : 'null';
-    document.getElementById('d5').textContent = modelReady ? 'READY' : 'loading...';
-    document.getElementById('d5').className = modelReady ? 'ok' : '';
-    document.getElementById('d6').textContent = sendCount;
-    document.getElementById('d8').textContent = lastSendError;
-    document.getElementById('d8').className = sendErrors > 0 ? 'err' : '';
-    document.getElementById('d9').textContent = modelFilesOk + '/' + modelFilesTotal;
-    document.getElementById('d10').textContent = currentCDN.split('/').slice(0, 3).join('/');
-  }
+}
 
+// ============================================================
+//  RENDER LOOP & STATE
+// ============================================================
+const MODES = [{ name: '液态玻璃', id: 0 }, { name: '霓虹描边', id: 1 }, { name: '能量护盾', id: 2 }];
+let appState = {
+  mode: 0,
+  recording: false,
+  hasBg: false,
+  active: false,
+  time: 0,
+  lastTimestamp: 0,
+  frameCount: 0,
+  fps: 60
+};
+
+function renderFrame(now) {
+  if (!appState.active) return;
+  requestAnimationFrame(renderFrame);
+  
+  const dt = appState.lastTimestamp ? Math.min(0.033, (now - appState.lastTimestamp) / 1000) : 0.016;
+  appState.lastTimestamp = now;
+  appState.time += dt;
+  appState.frameCount++;
+  if (appState.frameCount % 25 === 0) {
+    appState.fps = Math.round(1 / Math.max(dt, 0.005));
+    const fpsDiv = document.getElementById('fps');
+    if (fpsDiv) fpsDiv.textContent = appState.fps + ' FPS';
+  }
+  
+  const video = document.getElementById('cam');
+  const outCanvas = document.getElementById('output');
+  if (!video.videoWidth) return;
+  
+  // Update textures
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texCam);
-  if (video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  }
-
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+  
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, texMask);
-  if (curLandmarks) {
-    drawMask(curLandmarks);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, blurCvs);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  if (currentLandmarks && currentLandmarks.length === 21) {
+    drawMask(currentLandmarks);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, blurCanvas);
+    gl.uniform2f(uLoc.u_maskRes, blurCanvas.width, blurCanvas.height);
   } else {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
+    gl.uniform2f(uLoc.u_maskRes, 1.0, 1.0);
   }
-
-  gl.uniform1f(uLoc.u_time, S.time);
-  gl.uniform2f(uLoc.u_res, document.getElementById('output').width, document.getElementById('output').height);
-  gl.uniform1f(uLoc.u_mode, S.mode);
-  gl.uniform1f(uLoc.u_hasBg, S.hasBg ? 1.0 : 0.0);
-  gl.uniform1f(uLoc.u_debug, S.debug ? 1.0 : 0.0);
-  gl.viewport(0, 0, document.getElementById('output').width, document.getElementById('output').height);
+  
+  gl.uniform1f(uLoc.u_time, appState.time);
+  gl.uniform2f(uLoc.u_res, outCanvas.width, outCanvas.height);
+  gl.uniform1f(uLoc.u_mode, appState.mode);
+  gl.uniform1f(uLoc.u_hasBg, appState.hasBg ? 1.0 : 0.0);
+  gl.viewport(0, 0, outCanvas.width, outCanvas.height);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
-// ============ ACTIONS ============
-function switchMode() {
-  S.mode = (S.mode + 1) % MODES.length;
-  const el = document.getElementById('mode-hud');
-  el.textContent = MODES[S.mode].name;
-  el.style.borderColor = 'rgba(196,77,255,0.5)';
-  setTimeout(() => { el.style.borderColor = 'rgba(255,255,255,0.08)'; }, 300);
+// ============================================================
+//  INTERACTIONS
+// ============================================================
+function switchEffectMode() {
+  appState.mode = (appState.mode + 1) % MODES.length;
+  const hud = document.getElementById('mode-hud');
+  if (hud) {
+    hud.textContent = MODES[appState.mode].name;
+    hud.style.borderColor = '#c44dff';
+    setTimeout(() => { if (hud) hud.style.borderColor = 'rgba(255,255,255,0.08)'; }, 300);
+  }
+  showToast(MODES[appState.mode].name);
 }
-function screenshot() {
-  const f = document.createElement('div'); f.className = 'flash';
-  document.body.appendChild(f); setTimeout(() => f.remove(), 400);
+
+function takeScreenshot() {
+  const flash = document.createElement('div');
+  flash.className = 'flash';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 400);
   setTimeout(() => {
-    document.getElementById('output').toBlob(blob => {
+    const canvas = document.getElementById('output');
+    canvas.toBlob(blob => {
       if (!blob) return;
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'glass_' + Date.now() + '.png';
-      document.body.appendChild(a); a.click(); a.remove();
+      a.href = url;
+      a.download = `glass_${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
       showToast('截图已保存');
-    }, 'image/png');
+    });
   }, 50);
 }
-let recorder = null, chunks = [];
-function toggleRec() {
-  if (S.recording) {
-    recorder.stop(); S.recording = false;
-    document.getElementById('bRec').classList.remove('rec');
-    document.getElementById('bRec').querySelector('.bl').textContent = '录屏';
+
+let mediaRecorder = null;
+let recordedChunks = [];
+function toggleRecording() {
+  if (appState.recording) {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    appState.recording = false;
+    const recBtn = document.getElementById('bRec');
+    recBtn.classList.remove('rec');
+    recBtn.querySelector('.bl').textContent = '录屏';
     document.getElementById('rec-dot').style.display = 'none';
     showToast('录屏已保存');
   } else {
     const stream = document.getElementById('output').captureStream(30);
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9' : 'video/webm';
-    recorder = new MediaRecorder(stream, { mimeType: mime });
-    chunks = [];
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    recorder.onstop = () => {
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+    recordedChunks = [];
+    mediaRecorder.ondataavailable = e => { if (e.data.size) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: mime });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob(chunks, { type: mime }));
-      a.download = 'glass_' + Date.now() + '.webm';
-      document.body.appendChild(a); a.click(); a.remove();
+      a.href = url;
+      a.download = `glass_${Date.now()}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
     };
-    recorder.start(); S.recording = true;
-    document.getElementById('bRec').classList.add('rec');
-    document.getElementById('bRec').querySelector('.bl').textContent = '停止';
+    mediaRecorder.start();
+    appState.recording = true;
+    const recBtn = document.getElementById('bRec');
+    recBtn.classList.add('rec');
+    recBtn.querySelector('.bl').textContent = '停止';
     document.getElementById('rec-dot').style.display = 'block';
-    showToast('开始录屏');
+    showToast('录制中...');
   }
 }
-function uploadBg() { document.getElementById('bgIn').click(); }
+
+function handleBackgroundAction() {
+  if (appState.hasBg) {
+    // Clear background
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, texBg);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
+    appState.hasBg = false;
+    const bgBtn = document.getElementById('bBg');
+    bgBtn.classList.remove('on');
+    bgBtn.querySelector('.bl').textContent = '背景';
+    showToast('背景已清除');
+  } else {
+    document.getElementById('bgIn').click();
+  }
+}
+
 document.getElementById('bgIn').addEventListener('change', e => {
-  const file = e.target.files[0]; if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
   const img = new Image();
   img.onload = () => {
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, texBg);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    S.hasBg = true;
-    document.getElementById('bBg').classList.add('on');
-    document.getElementById('bBg').querySelector('.bl').textContent = '背景 ✓';
+    appState.hasBg = true;
+    const bgBtn = document.getElementById('bBg');
+    bgBtn.classList.add('on');
+    bgBtn.querySelector('.bl').textContent = '背景 ✓';
     showToast('虚拟背景已启用');
+    URL.revokeObjectURL(img.src);
   };
-  img.src = URL.createObjectURL(file); e.target.value = '';
+  img.src = URL.createObjectURL(file);
+  e.target.value = '';
 });
 
-document.getElementById('bMode').addEventListener('click', switchMode);
-document.getElementById('bShot').addEventListener('click', screenshot);
-document.getElementById('bRec').addEventListener('click', toggleRec);
-document.getElementById('bBg').addEventListener('click', uploadBg);
+// ============================================================
+//  EVENT LISTENERS
+// ============================================================
+document.getElementById('bMode').addEventListener('click', switchEffectMode);
+document.getElementById('bShot').addEventListener('click', takeScreenshot);
+document.getElementById('bRec').addEventListener('click', toggleRecording);
+document.getElementById('bBg').addEventListener('click', handleBackgroundAction);
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
-  if (e.code === 'Space') { e.preventDefault(); switchMode(); }
-  else if (e.code === 'KeyS') screenshot();
-  else if (e.code === 'KeyR') toggleRec();
-  else if (e.code === 'KeyB') uploadBg();
-});
-document.getElementById('debugToggle').addEventListener('click', () => {
-  S.debug = !S.debug;
-  document.getElementById('debug').classList.toggle('show', S.debug);
+  if (e.code === 'Space') { e.preventDefault(); switchEffectMode(); }
+  else if (e.code === 'KeyS') takeScreenshot();
+  else if (e.code === 'KeyR') toggleRecording();
+  else if (e.code === 'KeyB') handleBackgroundAction();
 });
 
-// ============ CDN HEALTH CHECK ============
-async function checkCDN(url, timeout) {
+// ============================================================
+//  BOOTSTRAP
+// ============================================================
+async function bootstrap() {
   try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), timeout);
-    const r = await fetch(url, { method: 'HEAD', signal: ctrl.signal });
-    clearTimeout(tid);
-    return r.ok;
-  } catch (e) {
-    return false;
-  }
-}
-
-// ============ INIT ============
-async function init() {
-  try {
-    // 1. WebGL
-    setProg(5, '初始化 WebGL...', 1);
-    await wait(100);
-    if (!initGL()) return;
-    setProg(15, 'WebGL 就绪', 1);
-
-    // 2. Camera
-    setProg(20, '启动摄像头...', 3);
-    await wait(50);
-    await startCam();
-    setProg(45, '摄像头就绪', 3);
-
-    // 3. Check which CDN can reach model files
-    setProg(50, '检测模型 CDN 可用性...', 2);
-    await wait(50);
-
-    let workingCDN = null;
-    for (let i = 0; i < CDN_LIST.length; i++) {
-      const testUrl = CDN_LIST[i] + '/hands.binarypb';
-      L('Testing CDN #' + i + ':', testUrl);
-      setProg(50 + i * 8, '检测 CDN: ' + CDN_LIST[i].split('/').slice(2, 3)[0] + '...', 2);
-      const ok = await checkCDN(testUrl, 6000);
-      L('CDN #' + i + ' result:', ok ? 'OK' : 'BLOCKED');
-      if (ok) { workingCDN = i; break; }
-    }
-
-    if (workingCDN === null) {
-      L('All CDNs failed!');
-      showErr('手部模型 CDN 全部无法访问',
-        '这通常是因为网络无法访问模型服务器。请尝试：<br><br>' +
-        '1. 检查网络连接是否正常<br>' +
-        '2. 如果使用代理/VPN，确保已开启<br>' +
-        '3. 手动下载模型文件并本地部署<br><br>' +
-        '需要的文件来自 @mediapipe/hands npm 包');
-      return;
-    }
-
-    // 4. Create Hands with working CDN
-    setProg(60, '加载手部检测引擎...', 2);
-    await wait(50);
-    tryCreateHands(workingCDN);
-
-    // 5. Configure canvas
-    configureCanvas();
-
-    // 6. Show debug button
-    document.getElementById('debugToggle').style.display = 'block';
-
-    // 7. Start detection loop immediately (send() triggers model download)
-    setProg(70, '下载模型文件 (可能需要 10-30 秒)...', 2);
-    S.playing = true; // Must be true for handLoop
-    requestAnimationFrame(render);
-    handLoop();
-
-    // 8. Wait for model to actually load
-    setProg(80, '等待模型初始化...', 2);
-    await waitForModel(25000);
-
-    if (!modelReady) {
-      L('Model did not become ready in time');
-      // Still show app - maybe it just needs more time
-      showToast('模型加载较慢，继续等待中...');
-      await waitForModel(15000);
-    }
-
-    setProg(100, '就绪!', 4);
-    await wait(400);
-
+    if (location.protocol === 'file:') throw new Error('请使用 HTTP/HTTPS 服务器运行 (摄像头需要安全上下文)');
+    setProgress(5, 'WebGL 初始化...', 1);
+    if (!initGL()) throw new Error('WebGL 失败');
+    setProgress(18, 'WebGL 就绪', 1);
+    
+    setProgress(22, '加载媒体工具库...', 2);
+    await loadMediaPipe('camera_utils');
+    setProgress(40, 'camera_utils 就绪', 2);
+    await loadMediaPipe('hands');
+    setProgress(58, '手部引擎就绪', 2);
+    
+    setProgress(62, '构建手部模型...', 3);
+    createHandsPipeline();
+    setProgress(70, '启动摄像头...', 3);
+    await initCamera();
+    setProgress(80, '等待视频流...', 4);
+    await waitForVideoReady();
+    resizeCanvases();
+    setProgress(88, '加载手势模型...', 3);
+    await waitForModelReady();
+    setProgress(100, '✨ 准备就绪', 4);
+    await delay(400);
+    
     document.getElementById('loader').classList.add('hidden');
     document.getElementById('app').style.display = 'block';
-    L('=== APP STARTED, CDN:', currentCDN, '===');
-
+    appState.active = true;
+    requestAnimationFrame(renderFrame);
+    LOG('✨ 系统已启动 | 方向修复 | 边缘增强');
   } catch (err) {
-    L('INIT ERR:', err);
-    showErr(err.message);
+    LOG('致命错误:', err);
+    showError(err.message || '初始化失败，请刷新重试或检查网络/摄像头权限');
   }
 }
-
-init();
+bootstrap();
 </script>
 </body>
 </html>
